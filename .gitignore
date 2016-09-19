@@ -1,5 +1,32 @@
+<<<<<<< HEAD
 .dub
 docs.json
 __dummy.html
 *.o
 *.obj
+=======
+# Compiled Object files
+*.o
+*.obj
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.a
+*.lib
+
+# Executables
+*.exe
+
+# DUB
+.dub
+docs.json
+__dummy.html
+docs/
+
+# Code coverage
+*.lst
+>>>>>>> 3704522671ba3cfb92ee86869a1e71ca51fbdfc3
