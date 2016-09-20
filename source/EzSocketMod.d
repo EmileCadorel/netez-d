@@ -68,6 +68,17 @@ class EzSocket {
 	this.socket.send (data);
     }
 
+    void [] recv_all () {
+	byte [] total;
+	while (true) {
+	    byte [] data;
+	    data.length = 256;
+	    auto length = this.socket.receive(data);
+	    total ~= data;
+	    if (length < 256) return total;
+	}
+    }
+
     void [] recv () {
 	ulong size[1];
 	this.socket.receive(size);

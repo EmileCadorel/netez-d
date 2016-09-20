@@ -22,17 +22,17 @@ class EzServSession(T) : Thread {
     
 private:
 
-    sock.EzSocket socket;
+
     bool end = false;
     
     void run () {
 	on_begin (this.socket.remoteAddress());
-	while (!end) {	    
+	while (!end) {
 	    auto id = this.socket.recvId ();
 	    if (id == -1) break;
 	    auto elem = (id in this.proto.regMsg);
 	    if (elem !is null)
-		elem.recv ();
+		elem.recv ();	    
 	}
 	this.socket.shutdown ();
 	on_end ();
@@ -40,6 +40,7 @@ private:
 
 protected:
     
+    sock.EzSocket socket;    
     T proto;
     
 }
