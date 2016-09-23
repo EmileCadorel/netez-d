@@ -9,7 +9,7 @@ This project is designed to enable creating network applications for anybody wit
 ## Example
 
 - Protocol:
-  The class EzProto, is common to *Client* and *Server*. It's use to enable the communication
+  The class EzProto, is shared by *Client* and *Server*. It's use to enable the communication
 
   ```D
       class Protocol : netez.EzProto {
