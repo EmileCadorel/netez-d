@@ -44,6 +44,7 @@ This project is designed to enable creating network applications for anybody wit
 	    writefln ("Connexion etablie : %s:%s",
 		    this.socket.remoteAddress.address,
 		    this.socket.remoteAddress.port);
+	    //Send PING message to the server.
 	    this.proto.ping.send ();
     }
 
