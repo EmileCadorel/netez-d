@@ -25,7 +25,7 @@ This project is designed to enable creating network applications for anybody wit
   
 - Session:
   A session is launched on each side of the communication (*server* and *client*), on the connection.
-  On the *server* side, each session are thread.
+  On the *server* side, each session is a thread.
 
   ```D
   class Session : netez.EzClientSession!Protocol {
