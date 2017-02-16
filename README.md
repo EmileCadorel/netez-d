@@ -1,6 +1,6 @@
 # netez-d
 
-Netez is an open-source project, for creating simple TCP network applications, with the signals/slots system. (strongly inspired from [netez](https://launchpad.net/netez)).
+Netez is an open-source project, for creating simple TCP network applications, with the signals/slots system. (strongly inspired by [netez](https://launchpad.net/netez)).
 
 ## Goal
 
