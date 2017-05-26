@@ -23,8 +23,7 @@ This project is designed to enable creating network applications for anybody wit
       }
   ```
   
-- Session:
-  A session is launched on each side of the communication (*server* and *client*), on the connection.
+- Session: A session is launched on each side of the communication (*server* and *client*), on the connection.
   On the *server* side, each session is a thread.
 
   ```D
@@ -51,12 +50,11 @@ This project is designed to enable creating network applications for anybody wit
     override void on_end () {
 	    writeln ("Deconnexion");
     }
-}
+  }
   ```
-  
+
 - Client: 
   The *client* will create the connection with the *server* specified by an address and a port.
-
   ```D
     netez.EzClient!Session session = new netez.EzClient!Session ("localhost", 2000);
     //The following code will be executed, only if the client session has ended.
