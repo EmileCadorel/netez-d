@@ -6,10 +6,10 @@ class Protocol : netez.Proto {
 
     this (netez.Socket sock) {
 	super (sock);
-	msg = new netez.Message !(1, int[string][]) (this);
+	msg = new netez.Message !(1, int, string, int[string]) (this);
     }
     
-    netez.Message!(1, int[string][]) msg;
+    netez.Message!(1, int, string, int[string]) msg;
 }
 
 class Session : netez.ClientSession!Protocol {
@@ -19,7 +19,8 @@ class Session : netez.ClientSession!Protocol {
 	this.proto.msg.connect (&this.array);
     }
 
-    void array (int[string][] data) {
+    void array (int x, string y, int[string] data) {
+	writeln (x, " ", y);
 	writeln ("ARRAY ~> ", data);
     }
 

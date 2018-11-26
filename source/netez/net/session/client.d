@@ -14,8 +14,8 @@ class ClientSession (T : proto.Proto) {
 	this.proto = new T(socket);
     }
 
-    abstract void on_begin ();
-    abstract void on_end ();
+    void on_begin (){}
+    void on_end (){}
 
     final void end_session () {
 	this.end = true;
@@ -37,6 +37,10 @@ class ClientSession (T : proto.Proto) {
 	on_end ();
     }
 
+    final void close () {
+	this.socket.shutdown ();
+    }
+    
 private:
     
 

@@ -48,18 +48,17 @@ void unpack (U, T : T[U])(sock.Socket receiver, ref T[U] elems) {
     }
 }
 
-void fromArray(T : T[U], U, TArgs...) (sock.Socket receiver, ref T[U] first, TArgs next) {
-    unpack ! (U, T[U]) (receiver, first);
-    fromArray ! TArgs (receiver, next);
-}
-
-void fromArray (T : T[], TArgs...) (sock.Socket receiver, ref T[] first, TArgs next) {
-    unpack ! (T[]) (receiver, first);
-    fromArray ! TArgs (receiver, next);
-}
-
 void fromArray(T, TArgs...) (sock.Socket receiver, ref T first, ref TArgs next) {
-    unpack ! T (receiver, first);
+    static if (is (T U : U [V], V)) {
+	unpack ! (V, U[V]) (receiver, first);
+    } else static if (is (T U : U [])) {
+	unpack ! (U[]) (receiver, first);
+    } else static if (is (T U : string)) {
+	unpack ! (string) (receiver, first);
+    } else {	
+	unpack (receiver, first);
+    }
+    
     fromArray ! TArgs (receiver, next);
 }
 
@@ -99,13 +98,16 @@ void enpack (U, T : T[U]) (sock.Socket sock, T [U] elem) {
     }
 }
 
-void toSocket (T : T[U], U, TArgs...) (sock.Socket sock, T[U] first, TArgs next) {
-    enpack ! (U, T[U]) (sock, first);    
-    toSocket ! TArgs (sock, next);
-}
-
 void toSocket (T, TArgs...) (sock.Socket sock, T first, TArgs next) {
-    enpack ! T (sock, first);
+    static if (is (T U : U [V], V)) {
+	enpack ! (V, U[V]) (sock, first);
+    } else static if (is (T U : U[])) {
+	enpack! (U []) (sock, first);
+    } else static if (is (T U : string)) {
+	enpack ! (string) (sock, first);
+    } else {
+	enpack ! T (sock, first);
+    }
     toSocket ! TArgs (sock, next);
 }
 

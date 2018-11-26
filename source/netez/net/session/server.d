@@ -13,8 +13,8 @@ class ServSession(T) : Thread {
 	this.proto = new T(socket);
     }
 
-    abstract void on_begin (Address addr);
-    abstract void on_end ();
+    void on_begin (Address addr){}
+    void on_end (){}
 
     final void end_session () {
 	this.end = true;

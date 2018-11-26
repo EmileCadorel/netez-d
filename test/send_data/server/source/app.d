@@ -1,14 +1,15 @@
 import std.stdio;
 import netez = netez._;
 
+
 class Protocol : netez.Proto {
 
     this (netez.Socket sock) {
 	super (sock);
-	msg = new netez.Message !(1, int[string][]) (this);
+	msg = new netez.Message !(1, int, string, int[string]) (this);
     }
     
-    netez.Message!(1, int[string][]) msg;
+    netez.Message!(1, int, string, int[string]) msg;
 }
 
 class Session : netez.ServSession!Protocol {
@@ -20,10 +21,7 @@ class Session : netez.ServSession!Protocol {
     override void on_begin (netez.Address client) {
 	this.client = client;
 	writefln ("Nouveau client : %s:%s", client.address, client.port);
-	this.proto.msg.send ([
-	    ["hi" : 1, "by" : 2, "truc" : 3],
-	    ["salut" : 12, "test" : 45]
-	]);
+	this.proto.msg.send (0, "test", ["core" : 2, "mem" : 12]);
 	super.end_session ();
     }
 
