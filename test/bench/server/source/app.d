@@ -5,10 +5,10 @@ class Protocol : netez.Proto {
 
     this (netez.Socket sock) {
 	super (sock);
-	msg = new netez.Message !(1, int[string][]) (this);
+	file = new netez.StreamMessage !(1, string) (this);
     }
     
-    netez.Message!(1, int[string][]) msg;
+    netez.StreamMessage!(1, string) file;
 }
 
 class Session : netez.ServSession!Protocol {
@@ -20,10 +20,18 @@ class Session : netez.ServSession!Protocol {
     override void on_begin (netez.Address client) {
 	this.client = client;
 	writefln ("Nouveau client : %s:%s", client.address, client.port);
-	this.proto.msg.send ([
-	    ["hi" : 1, "by" : 2, "truc" : 3],
-	    ["salut" : 12, "test" : 45]
-	]);
+	this.proto.file.send ("file.out");
+
+	auto file = new File ("../TheFallOfMan.txt", "r");
+	char [255] reading;
+	netez.Stream str = this.proto.file.open ();
+	while (true) {
+	    auto buf = file.rawRead (reading);	    
+	    if (buf.length != 0) str.write (buf);
+	    if (buf.length != 255) break;
+	}
+	str.close ();
+	
 	super.end_session ();
     }
 

@@ -25,14 +25,14 @@ class Session : netez.EzClientSession!Protocol {
 	super.end_session ();
     }    
 
-    void on_begin () {
+    override void on_begin () {
 	writefln ("Connexion etablie : %s:%s",
 		  this.socket.remoteAddress.address,
 		  this.socket.remoteAddress.port);
 	this.proto.ping.send ();
     }
 
-    void on_end () {
+    override void on_end () {
 	writeln ("Deconnexion");
     }
     

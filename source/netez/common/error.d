@@ -1,4 +1,4 @@
-module EzErrorMod;
+module netez.common.error;
 import std.exception;
 import std.conv;
 

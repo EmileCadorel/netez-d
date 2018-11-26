@@ -25,7 +25,7 @@ class Session : netez.EzServSession!Protocol {
 	this.proto.pong.send ();
     }
 
-    void on_begin (netez.EzAddress client) {
+    override void on_begin (netez.EzAddress client) {
 	this.client = client;
 	writefln ("Nouveau client : %s:%s", client.address, client.port);
     }

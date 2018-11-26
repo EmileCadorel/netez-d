@@ -1,9 +1,9 @@
-module EzServerMod;
-import sock = EzSocketMod;
+module netez.net.server;
+import sock = netez.common.socket;
 import std.conv;
-import EzErrorMod;
+import netez.common.error;
 
-class EzServer(T) {
+class Server(T) {
 
     this (ushort port) {
 	init (port);
@@ -23,7 +23,7 @@ class EzServer(T) {
  private:
 
     void init (ushort port) {
-	this.socket = new sock.EzSocket (port);
+	this.socket = new sock.Socket (port);
 	this.socket.bind ();
 	this.socket.listen ();
 	run ();	
@@ -31,11 +31,11 @@ class EzServer(T) {
     
     void run () {
 	while (true) {
-	    sock.EzSocket client = this.socket.accept ();
+	    sock.Socket client = this.socket.accept ();
 	    auto session = new T (client);
 	    session.start ();
 	}
     }
     
-    sock.EzSocket socket;
+    sock.Socket socket;
 }

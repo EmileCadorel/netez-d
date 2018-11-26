@@ -1,19 +1,19 @@
-module EzServSessionMod;
+module netez.net.session.server;
 import core.thread;
-import sock = EzSocketMod;
-import proto = EzProtoMod;
-import EzAddressMod;
+import sock = netez.common.socket;
+import proto = netez.net.proto;
+import netez.common.address;
 import std.stdio;
 
-class EzServSession(T) : Thread {
+class ServSession(T) : Thread {
 
-    this (sock.EzSocket socket) {
+    this (sock.Socket socket) {
 	super (&run);
 	this.socket = socket;
 	this.proto = new T(socket);
     }
 
-    abstract void on_begin (EzAddress addr);
+    abstract void on_begin (Address addr);
     abstract void on_end ();
 
     final void end_session () {
@@ -40,7 +40,7 @@ private:
 
 protected:
     
-    sock.EzSocket socket;    
+    sock.Socket socket;    
     T proto;
     
 }

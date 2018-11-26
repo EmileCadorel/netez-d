@@ -1,15 +1,14 @@
-module EzAddressMod;
+module netez.common.address;
 
-import std.socket;
-
+import socket = std.socket;
 
 /***
- Classe qui definie une adresse, tcp-ip
+ * Classe qui definie une adresse, tcp-ip
 */
 
-class EzAddress {
+class Address {
 
-    this (Address addr) {
+    this (socket.Address addr) {
 	this.addr = addr;
     }
 
@@ -21,9 +20,8 @@ class EzAddress {
 	return this.addr.toPortString ();
     }
         
-    
 private:
 
-    Address addr;
+    socket.Address addr;
 
 }

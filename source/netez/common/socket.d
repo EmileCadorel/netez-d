@@ -1,11 +1,12 @@
-module EzSocketMod;
-import EzPackageMod;
-import std.socket, std.stdio;
+module netez.common.socket;
+import netez.datas.pack;
+import std.socket;
+import std.stdio;
 import std.exception;
-import EzAddressMod;
-import EzErrorMod;
+import net_addr = netez.common.address;
+import netez.common.error;
 
-class EzSocket {   
+class Socket {   
 
     class UnknownHost : Exception {
 	this(string addr) {
@@ -68,6 +69,29 @@ class EzSocket {
 	this.socket.send (data);
     }
 
+    void rawSend (T) (T data) {
+	auto arr = (cast(ubyte*)&data)[0 .. T.sizeof];
+	this.socket.send (arr);
+    }
+    
+    void rawSend (void[] data) {
+	this.socket.send (data);
+    }
+
+    T rawRecv (T) () {
+	void [] data;
+	data.length = T.sizeof;
+	this.socket.receive (data);
+	return (cast (T*) data [0 .. T.sizeof]) [0];
+    }
+
+    void[] rawRecv (ulong size) {
+	void [] data;
+	data.length = size;	
+	this.socket.receive (data);
+	return data;
+    }
+    
     void [] recv_all () {
 	byte [] total;
 	while (true) {
@@ -80,8 +104,9 @@ class EzSocket {
     }
 
     void [] recv () {
-	ulong size[1];
+	long [1] size;
 	this.socket.receive(size);
+	if (size [0] == -1) return [];
 	void[] data;
 	data.length = size[0];
 	this.socket.receive (data);
@@ -89,19 +114,19 @@ class EzSocket {
     }
 
     long recvId () {
-	long id[1];
+	long [1] id;
 	auto length = this.socket.receive(id);
 	if (length == 0) return -1;
 	return id[0];
     }
     
-    EzSocket accept () {
+    Socket accept () {
 	auto sock = this.socket.accept ();
-	return new EzSocket (sock);
+	return new Socket (sock);
     }
 
-    EzAddress remoteAddress () {
-	return new EzAddress (this.socket.remoteAddress ());
+    net_addr.Address remoteAddress () {
+	return new net_addr.Address (this.socket.remoteAddress ());
     }
     
     void shutdown () {       
@@ -114,12 +139,12 @@ class EzSocket {
     
 private:
 
-    this (Socket sock) {
+    this (std.socket.Socket sock) {
 	this.socket = sock;
     }
    
-    Socket socket;
+    std.socket.Socket socket;
     string addrstr;
-    Address addr;
+    std.socket.Address addr;
     ushort port;
 }

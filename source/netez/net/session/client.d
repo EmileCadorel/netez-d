@@ -1,15 +1,15 @@
-module EzClientSessionMod;
+module netez.net.session.client;
 
-import sock = EzSocketMod;
-import proto = EzProtoMod;
+import sock = netez.common.socket;
+import proto = netez.net.proto;
 
 /**
  Classe de session de client
- Instanciee par le EzClient lorsqu'il se connecte a un serveur
+ Instanciee par le Client lorsqu'il se connecte a un serveur
 */
-class EzClientSession (T : proto.EzProto) {
+class ClientSession (T : proto.Proto) {
 
-    this (sock.EzSocket socket) {
+    this (sock.Socket socket) {
 	this.socket = socket;
 	this.proto = new T(socket);
     }
@@ -44,7 +44,7 @@ private:
     
 protected:
     
-    sock.EzSocket socket;
+    sock.Socket socket;
     T proto;
     
 }

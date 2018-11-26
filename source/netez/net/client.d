@@ -1,14 +1,14 @@
-module EzClientMod;
-import EzClientSessionMod;
-import sock = EzSocketMod;
-import EzErrorMod;
+module netez.net.client;
+import netez.net.session.client;
+import sock = netez.common.socket;
+import netez.common.error;
 import std.conv;
 
 /**
  Classe permettant la creation d'un client
- Le template T doit etre heriter de la classe EzClientSession
+ Le template T doit etre heriter de la classe ClientSession
 */
-class EzClient (T : EzClientSession!P, P) {
+class Client (T : ClientSession!P, P) {
 
     this(string addr, ushort port) {
 	init (addr, port);
@@ -29,13 +29,13 @@ class EzClient (T : EzClientSession!P, P) {
 private:
 
     void init (string addr, ushort port) {
-	this.socket = new sock.EzSocket (addr, port);
+	this.socket = new sock.Socket (addr, port);
 	this.socket.connect ();
 	this.session = new T (socket);
 	this.session.start ();
     }
     
-    sock.EzSocket socket;
+    sock.Socket socket;
     T session; 
     
 }

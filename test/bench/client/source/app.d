@@ -1,32 +1,34 @@
 import std.stdio;
 import netez = netez._;
 
-
 class Protocol : netez.Proto {
 
     this (netez.Socket sock) {
 	super (sock);
-	msg = new netez.Message !(1, int[string][]) (this);
+	file = new netez.StreamMessage !(1, string) (this);
     }
     
-    netez.Message!(1, int[string][]) msg;
+    netez.StreamMessage!(1, string) file;
 }
 
 class Session : netez.ClientSession!Protocol {
 
     this (netez.Socket sock) {
 	super (sock);
-	this.proto.msg.connect (&this.array);
+	this.proto.file.connect (&this.file);
     }
 
-    void array (int[string][] data) {
-	writeln ("ARRAY ~> ", data);
+    void file (netez.Stream stream, string filename) {
+	writeln (filename);
+	auto file = File (filename, "w");
+	while (true) {
+	    string data = stream.read!string ();
+	    if (data == []) break;
+	    file.rawWrite (data);
+	}
     }
-
-    void map (int[string] data) {
-	writeln ("MAP ~> ", data);
-    }    
-
+    
+    
     override void on_begin () {
 	writefln ("Connexion etablie : %s:%s",
 		  this.socket.remoteAddress.address,
