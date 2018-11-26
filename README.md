@@ -12,14 +12,14 @@ This project is designed to enable creating network applications for anybody wit
   The class EzProto, is shared by *Client* and *Server*. It's use to enable the communication
 
   ```D
-      class Protocol : netez.EzProto {
-        this (netez.EzSocket sock) {
+      class Protocol : netez.Proto {
+        this (netez.Socket sock) {
           super (sock); 
-          ping = new netez.EzMessage !(1) (this);
-          pong = new netez.EzMessage !(2) (this);
+          ping = new netez.Message !(1) (this);
+          pong = new netez.Message !(2) (this);
         }
-        netez.EzMessage!(1) ping;
-        netez.EzMessage!(2) pong;
+        netez.Message!(1) ping;
+        netez.Message!(2) pong;
       }
   ```
   
@@ -27,8 +27,8 @@ This project is designed to enable creating network applications for anybody wit
   On the *server* side, each session is a thread.
 
   ```D
-  class Session : netez.EzClientSession!Protocol {
-    this (netez.EzSocket sock) {
+  class Session : netez.ClientSession!Protocol {
+    this (netez.Socket sock) {
 	    super (sock);
 	    //When the client will receive PONG message, it will call PONG method.
 	    this.proto.pong.connect (&this.pong); 
@@ -56,7 +56,7 @@ This project is designed to enable creating network applications for anybody wit
 - Client: 
   The *client* will create the connection with the *server* specified by an address and a port.
   ```D
-    netez.EzClient!Session session = new netez.EzClient!Session ("localhost", 2000);
+    netez.Client!Session session = new netez.Client!Session ("localhost", 2000);
     //The following code will be executed, only if the client session has ended.
     ...
   ```
@@ -64,7 +64,7 @@ This project is designed to enable creating network applications for anybody wit
 - Server
   The *server* will create a TCP server on a specific port, and instanciate a (Threaded) session each time a *client* want to connect.
   ```D
-    //The session must inherit from EzServSession!(T : EzProto) ...
-    netez.EzServer!Session session = new netez.EzServer!Session (2000);
+    //The session must inherit from ServSession!(T : Proto) ...
+    netez.Server!Session session = new netez.Server!Session (2000);
   ```
 
