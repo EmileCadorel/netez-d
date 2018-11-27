@@ -5,6 +5,8 @@ public import netez.net.session.client;
 public import netez.net.server;
 public import netez.net.session.server;
 
+public import netez.net.session.stream;
+
 public import netez.net.proto;
 
 public import netez.datas.message;

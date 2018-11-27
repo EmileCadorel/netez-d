@@ -63,7 +63,9 @@ class AsyncClient (T : ClientSession!P, P) {
     T open () {
 	auto socket = new sock.Socket (this._addr, this._port);
 	socket.connect ();
-	return new T (socket);
+	auto session = new T (socket);
+	session.startAsync ();
+	return session;
     }
     
 protected : 

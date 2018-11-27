@@ -85,10 +85,10 @@ class Socket {
 	return (cast (T*) data [0 .. T.sizeof]) [0];
     }
 
-    void[] rawRecv (ulong size) {
+    void[] rawRecv (ref ulong size) {
 	void [] data;
 	data.length = size;	
-	this.socket.receive (data);
+	size = this.socket.receive (data);
 	return data;
     }
     
@@ -115,8 +115,8 @@ class Socket {
 
     long recvId () {
 	long [1] id;
-	auto length = this.socket.receive(id);
-	if (length == 0) return -1;
+	auto length = this.socket.receive(id);	
+	if (length == 0) return -1;	
 	return id[0];
     }
     
@@ -125,6 +125,10 @@ class Socket {
 	return new Socket (sock);
     }
 
+    bool isAlive () {
+	return this.socket.isAlive ();
+    }
+    
     net_addr.Address remoteAddress () {
 	return new net_addr.Address (this.socket.remoteAddress ());
     }

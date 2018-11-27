@@ -1,7 +1,24 @@
 module netez.net.session.client;
 
+import std.concurrency;
 import sock = netez.common.socket;
 import proto = netez.net.proto;
+import core.thread;
+
+private class ClientSessionThread (T) : Thread {
+
+    ClientSession!T session;
+    
+    this (ClientSession!T session) {
+	super (&run);
+	this.session = session;
+    }
+
+    void run () {
+	this.session.start ();
+    }
+    
+}
 
 /**
  Classe de session de client
@@ -37,6 +54,15 @@ class ClientSession (T : proto.Proto) {
 	on_end ();
     }
 
+    final void startAsync () {
+	this._thread = new ClientSessionThread!T (this);
+	this._thread.start ();
+    }
+
+    void join () {
+	this._thread.join ();
+    }
+
     final void close () {
 	this.socket.shutdown ();
     }
@@ -45,6 +71,7 @@ private:
     
 
     bool end = false;
+    private Thread _thread;
     
 protected:
     

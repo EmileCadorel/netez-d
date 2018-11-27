@@ -5,14 +5,54 @@ import pack = netez.datas.pack;
 import sock = netez.common.socket;
 import netez.datas.message;
 import proto = netez.net.proto;
+import std.outbuffer;
 
 class Stream {
     private sock.Socket _socket;
 
-    private this (sock.Socket socket) {
+    this (sock.Socket socket) {
 	this._socket = socket;
     }
     
+    void rawWrite (byte[] datas) {
+	this._socket.rawSend (datas);
+    }
+
+    void rawWrite (string datas) {
+	this._socket.rawSend (cast (byte []) datas);
+    }
+
+    ubyte[] rawRead (ulong len) {
+	void [] data = this._socket.rawRecv (len);
+	return cast (ubyte[]) (cast (ubyte*) data.ptr) [0 .. len];
+    }
+
+    ubyte[] rawRead () {
+	OutBuffer buf = new OutBuffer ();
+	while (true) {
+	    ulong len = 256;
+	    void [] vdata = this._socket.rawRecv (len);
+	    ubyte [] data = cast (ubyte[]) (cast (ubyte*) vdata.ptr) [0 .. len];
+	    buf.write (data);
+	    if (len != 256) break;
+	}
+	
+	return buf.toBytes ();
+    }
+
+    string rawRead (T : string)  () {
+	OutBuffer buf = new OutBuffer ();
+	while (true) {
+	    ulong len = 256;
+	    void [] vdata = this._socket.rawRecv (len);
+	    ubyte [] data = cast (ubyte[]) (cast (ubyte*) vdata.ptr) [0 .. len];
+	    buf.write (data);
+	    if (len != 256) break;
+	}
+	
+	return buf.toString ();
+    }
+           
     void write (T) (T datas) {
 	pack.Package pck = new pack.Package ();
 	pck.send (this._socket, datas);
@@ -25,6 +65,10 @@ class Stream {
 	return ret;
     }
 
+    bool isAlive () {
+	return this._socket.isAlive ();
+    }
+    
     void close () {
 	this._socket.shutdown ();
     }
@@ -47,6 +91,15 @@ class StreamMessage (ulong ID, TArgs ...) : Message!(ID, TArgs) {
 	createServer (port);
     }
     
+    override void opCall (TArgs datas) {
+	auto port = getPort ();
+	socket.sendId (this.id);
+	socket.sendId (port);
+	pack.Package pck = new pack.Package ();
+	pck.send (this.socket, datas);
+	createServer (port);
+    }
+
     override void recv () {
 	ushort port = cast (ushort) socket.recvId ();	
 	Tuple!(TArgs) ret;
@@ -61,6 +114,10 @@ class StreamMessage (ulong ID, TArgs ...) : Message!(ID, TArgs) {
 	this._slots.insertFront (fun);
     }
 
+    void onRecv (void delegate(Stream, TArgs) fun) {
+	this._slots.insertFront (fun);
+    }
+    
     Stream open () {
 	if (this._streamSocket is null) return null;
 	sock.Socket client = this._streamSocket.accept ();

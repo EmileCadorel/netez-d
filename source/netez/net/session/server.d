@@ -2,6 +2,7 @@ module netez.net.session.server;
 import core.thread;
 import sock = netez.common.socket;
 import proto = netez.net.proto;
+import netez.streaming.stream;
 import netez.common.address;
 import std.stdio;
 

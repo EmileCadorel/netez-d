@@ -28,8 +28,18 @@ class Message (ulong ID, TArgs...) : MessageBase {
 	pack.Package pck = new pack.Package ();
 	pck.send (this.socket, datas);
     }
+    
+    void opCall (TArgs datas) {
+	socket.sendId (this.id);
+	pack.Package pck = new pack.Package ();
+	pck.send (this.socket, datas);
+    }    
 
     void connect (void delegate(TArgs) fun) {
+	this.connections.insertFront (fun);
+    }
+
+    void onRecv (void delegate (TArgs) fun) {
 	this.connections.insertFront (fun);
     }
     
