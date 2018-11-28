@@ -24,13 +24,13 @@ class Message (ulong ID, TArgs...) : MessageBase {
     }
 
     void send (TArgs datas) {
-	socket.sendId (this.id);
+	socket.sendId (ID);
 	pack.Package pck = new pack.Package ();
 	pck.send (this.socket, datas);
     }
     
     void opCall (TArgs datas) {
-	socket.sendId (this.id);
+	socket.sendId (ID);
 	pack.Package pck = new pack.Package ();
 	pck.send (this.socket, datas);
     }    

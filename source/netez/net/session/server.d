@@ -14,10 +14,10 @@ class ServSession(T) : Thread {
 	this.proto = new T(socket);
     }
 
-    void on_begin (Address addr){}
-    void on_end (){}
+    void onBegin (Address addr){}
+    void onEnd (){}
 
-    final void end_session () {
+    final void endSession () {
 	this.end = true;
     }
     
@@ -27,7 +27,7 @@ private:
     bool end = false;
     
     void run () {
-	on_begin (this.socket.remoteAddress());
+	onBegin (this.socket.remoteAddress());
 	while (!end) {
 	    auto id = this.socket.recvId ();
 	    if (id == -1) break;
@@ -36,7 +36,7 @@ private:
 		elem.recv ();	    
 	}
 	this.socket.shutdown ();
-	on_end ();
+	onEnd ();
     }    
 
 protected:

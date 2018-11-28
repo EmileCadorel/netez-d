@@ -32,6 +32,11 @@ class EzBindRefused : EzError {
     }    
 }
 
+class EzMultiIdMessage : EzError {
+    this (ulong id) {
+	super ("message id : " ~ id.to!string ~ " is used multiple times");
+    }
+}
 
 
 

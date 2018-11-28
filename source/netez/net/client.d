@@ -11,6 +11,8 @@ import std.conv;
 class Client (T : ClientSession!P, P) {
 
     this(string addr, ushort port) {
+	this._port = port;
+	this._addr = addr;
 	init (addr, port);
     }
 
@@ -26,6 +28,7 @@ class Client (T : ClientSession!P, P) {
 	} else throw new EzUsageError("address port");
     }
     
+
 protected:
 
     void init (string addr, ushort port) {
@@ -37,7 +40,8 @@ protected:
     
     sock.Socket socket;
     T session; 
-    
+    string _addr;
+    ushort _port;
 }
 
 class AsyncClient (T : ClientSession!P, P) {
@@ -60,10 +64,17 @@ class AsyncClient (T : ClientSession!P, P) {
 	} else throw new EzUsageError("address port");
     }
 
-    T open () {
+    void openSync (TArgs...) (TArgs args) {
 	auto socket = new sock.Socket (this._addr, this._port);
 	socket.connect ();
-	auto session = new T (socket);
+	auto session = new T (socket, args);
+	session.start ();
+    }
+    
+    T open (TArgs...) (TArgs args) {
+	auto socket = new sock.Socket (this._addr, this._port);
+	socket.connect ();
+	auto session = new T (socket, args);
 	session.startAsync ();
 	return session;
     }

@@ -31,10 +31,10 @@ class ClientSession (T : proto.Proto) {
 	this.proto = new T(socket);
     }
 
-    void on_begin (){}
-    void on_end (){}
+    void onBegin (){}
+    void onEnd (){}
 
-    final void end_session () {
+    final void endSession () {
 	this.end = true;
     }
 
@@ -42,7 +42,7 @@ class ClientSession (T : proto.Proto) {
      Methode appelee lors de la connexion
      */
     final void start () {
-	on_begin ();
+	onBegin ();
 	while (!end) {
 	    auto id = this.socket.recvId ();
 	    if (id == -1) break;
@@ -51,7 +51,7 @@ class ClientSession (T : proto.Proto) {
 		elem.recv ();
 	}
 	this.socket.shutdown();
-	on_end ();
+	onEnd ();
     }
 
     final void startAsync () {
