@@ -33,17 +33,21 @@ void unpack (T : T[]) (sock.Socket receiver, ref T [] elems) {
 	foreach (it ; 0 .. elems.length)
 	    unpack ! (string) (receiver, elems [it]);   
     } else {
-	void [] data = receiver.rawRecv (len * T.sizeof);
+	auto size = len * T.sizeof;
+	void [] data = receiver.rawRecv (size);
 	elems = (cast (T*) (data.ptr))[0 .. len];
     }
 }
 
 void unpack (U, T : T[U])(sock.Socket receiver, ref T[U] elems) {
     auto len = receiver.rawRecv!ulong ();
+    writeln ("Unpack : ", typeid (T[U]), " of len : ", len);
     foreach (it ; 0 .. len) {
 	T value; U key;
 	unpack (receiver, key);
+	writeln ("\t - Unpack : ", typeid (T[U]), " Key : ", key);
 	unpack (receiver, value);
+	writeln ("\t - Unpack : ", typeid (T[U]), " value : ", value);
 	elems [key] = value;
     }
 }
@@ -92,9 +96,12 @@ void enpack (T : T[]) (sock.Socket sender, T [] elem) {
 
 void enpack (U, T : T[U]) (sock.Socket sock, T [U] elem) {
     sock.rawSend (elem.length);
+    writeln ("Enpack : ", typeid (T[U]), " of len : ", elem.length);
     foreach (key, value ; elem) {
 	enpack (sock, key);
+	writeln ("\t - Enpack : ", typeid (T[U]), " key : ", key);
 	enpack (sock, value);
+	writeln ("\t - Enpack : ", typeid (T[U]), " value : ", value);
     }
 }
 

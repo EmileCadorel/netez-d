@@ -24,18 +24,22 @@ class Message (ulong ID, TArgs...) : MessageBase {
     }
 
     void send (TArgs datas) {
-	socket.sendId (ID);
-	pack.Package pck = new pack.Package ();
-	pck.send (this.socket, datas);
+	synchronized (this.socket) {
+	    socket.sendId (ID);
+	    pack.Package pck = new pack.Package ();
+	    pck.send (this.socket, datas);
+	}
     }
     
     void opCall (TArgs datas) {
-	socket.sendId (ID);
-	pack.Package pck = new pack.Package ();
-	pck.send (this.socket, datas);
+	synchronized (this.socket) {
+	    socket.sendId (ID);
+	    pack.Package pck = new pack.Package ();
+	    pck.send (this.socket, datas);
+	}
     }    
 
-    void connect (void delegate(TArgs) fun) {
+    void connect (void delegate(TArgs) fun) {	
 	this.connections.insertFront (fun);
     }
 
@@ -46,7 +50,11 @@ class Message (ulong ID, TArgs...) : MessageBase {
     override void recv () {
 	Tuple!TArgs ret;
 	pack.Package pck = new pack.Package ();
-	pck.unpack (this.socket, ret.expand);
+
+	synchronized (this.socket) {
+	    pck.unpack (this.socket, ret.expand);
+	}
+	
 	foreach (it ; connections)
 	    it (ret.expand);
     }

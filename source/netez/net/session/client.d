@@ -3,6 +3,7 @@ module netez.net.session.client;
 import std.concurrency;
 import sock = netez.common.socket;
 import proto = netez.net.proto;
+import addr = netez.common.address;
 import core.thread;
 
 private class ClientSessionThread (T) : Thread {
@@ -59,6 +60,10 @@ class ClientSession (T : proto.Proto) {
 	this._thread.start ();
     }
 
+    final addr.Address getAddress () {
+	return this.socket.remoteAddress ();
+    }
+    
     void join () {
 	this._thread.join ();
     }

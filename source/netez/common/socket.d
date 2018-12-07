@@ -75,7 +75,8 @@ class Socket {
     }
     
     void rawSend (void[] data) {
-	this.socket.send (data);
+	import std.stdio;
+	auto sent = this.socket.send (data);
     }
 
     T rawRecv (T) () {
@@ -87,8 +88,34 @@ class Socket {
 
     void[] rawRecv (ref ulong size) {
 	void [] data;
-	data.length = size;	
-	size = this.socket.receive (data);
+	data.length = size;
+	size = this.socket.receive (data);   
+	return data [0 .. size];
+    }
+
+
+    void[] rawRecvForce (ref ulong size) {
+	void [] data;
+	data.length = size;
+	auto begin = data;
+	while (true) {	    
+	    size = this.socket.receive (begin);
+	    begin = begin [size .. $];
+	    if (begin == []) break;
+	    if (size == 0) break;
+	}
+	return data;
+    }
+
+    
+    void[] rawRecv (void [] data) {
+	auto size = data.length;
+	auto begin = data;
+	while (true) {	    
+	    size = this.socket.receive (begin);
+	    begin = begin [size .. $];
+	    if (begin == []) break;
+	}
 	return data;
     }
     

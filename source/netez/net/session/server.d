@@ -33,7 +33,7 @@ private:
 	    if (id == -1) break;
 	    auto elem = (id in this.proto.regMsg);
 	    if (elem !is null)
-		elem.recv ();	    
+		elem.recv ();
 	}
 	this.socket.shutdown ();
 	onEnd ();

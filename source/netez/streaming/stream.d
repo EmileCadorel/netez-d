@@ -5,7 +5,8 @@ import pack = netez.datas.pack;
 import sock = netez.common.socket;
 import netez.datas.message;
 import proto = netez.net.proto;
-import std.outbuffer;
+import std.outbuffer, std.stdio;
+import netez.common.error;
 
 class Stream {
     private sock.Socket _socket;
@@ -31,13 +32,17 @@ class Stream {
 	OutBuffer buf = new OutBuffer ();
 	while (true) {
 	    ulong len = 256;
-	    void [] vdata = this._socket.rawRecv (len);
+	    void [] vdata = this._socket.rawRecv (len);	    
 	    ubyte [] data = cast (ubyte[]) (cast (ubyte*) vdata.ptr) [0 .. len];
 	    buf.write (data);
 	    if (len != 256) break;
 	}
 	
 	return buf.toBytes ();
+    }
+
+    ubyte [] rawRead (ubyte[] data) {
+	return cast (ubyte[]) this._socket.rawRecv (data);
     }
 
     string rawRead (T : string)  () {
@@ -83,21 +88,21 @@ class StreamMessage (ulong ID, TArgs ...) : Message!(ID, TArgs) {
     }
 
     override void send (TArgs datas) {
-	auto port = getPort ();
+	auto port = getPort ();	
+	port = createServer (port);
 	socket.sendId (this.id);
 	socket.sendId (port);
 	pack.Package pck = new pack.Package ();
 	pck.send (this.socket, datas);
-	createServer (port);
     }
     
     override void opCall (TArgs datas) {
 	auto port = getPort ();
+	port = createServer (port);
 	socket.sendId (this.id);
 	socket.sendId (port);
 	pack.Package pck = new pack.Package ();
 	pck.send (this.socket, datas);
-	createServer (port);
     }
 
     override void recv () {
@@ -127,7 +132,7 @@ class StreamMessage (ulong ID, TArgs ...) : Message!(ID, TArgs) {
  private :
     
     SList!(void delegate(Stream, TArgs)) _slots;
-    static ushort __lastPort__ = 4000;
+    static ushort __lastPort__ = 12000;
 
     sock.Socket _streamSocket;
     
@@ -136,15 +141,25 @@ class StreamMessage (ulong ID, TArgs ...) : Message!(ID, TArgs) {
 	return __lastPort__;
     }
 
-    void createServer (ushort port) {
-	this._streamSocket = new sock.Socket (port);
-	this._streamSocket.bind ();
-	this._streamSocket.listen ();
+    ushort createServer (ushort port) {
+	while (true) {
+	    try {
+		this._streamSocket = new sock.Socket (port);
+		this._streamSocket.bind ();
+		this._streamSocket.listen ();
+		break;
+	    } catch (EzBindRefused bind) {
+		port += 1;
+	    }
+	}
+	writeln("Server created on port : ", port);
+	return port;
     }
 
-    Stream connectTo (ushort port) {
+    Stream connectTo (ushort port) {	
 	sock.Socket socket = new sock.Socket (this.socket.remoteAddress ().address, port);
 	socket.connect ();
+	writeln ("Stream connected on port : ", port);
 	return new Stream (socket);
     }
     
