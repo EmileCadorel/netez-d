@@ -1,0 +1,9 @@
+{
+    "name": "server",
+    "description": "A minimal D application.",
+    "copyright": "Copyright © 2016, emile",
+    "authors": ["emile"],
+    "dependencies": {
+	"netez-d" : "*"
+    }
+}

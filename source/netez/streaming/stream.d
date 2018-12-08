@@ -132,7 +132,7 @@ class StreamMessage (ulong ID, TArgs ...) : Message!(ID, TArgs) {
  private :
     
     SList!(void delegate(Stream, TArgs)) _slots;
-    static ushort __lastPort__ = 12000;
+    static ushort __lastPort__ = 12_000;
 
     sock.Socket _streamSocket;
     

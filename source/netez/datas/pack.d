@@ -1,14 +1,57 @@
 module netez.datas.pack;
 import std.socket;
 import std.stdio;
-
+import std.traits;
 import sock = netez.common.socket;
 
 /**
  System permettant l'enpaquetage des informations a transmettre par message
  */
 
-void unpack (T) (sock.Socket receiver, ref T elem) {    
+void printFields(T)(T args)
+{
+    import std.conv;
+    auto values = args.tupleof;
+    
+    size_t max;
+    size_t temp;
+    foreach (index, value; values)
+	{
+	    temp = T.tupleof[index].stringof.length;
+	    if (max < temp) max = temp;
+	}
+    max += 1;
+    foreach (index, value; values)
+	{
+	    writefln("%-" ~ to!string(max) ~ "s %s", T.tupleof[index].stringof, value);
+	}                
+}
+
+void unpack (T) (sock.Socket receiver, ref T elem)
+    if (isAggregateType!T)
+{
+    static if (is (T == struct)) {	
+	foreach (index, ref value ; elem.tupleof) {
+	    static if (hasUDA!(T.tupleof [index], "pack"))
+		unpack!(typeof (T.tupleof [index])) (receiver, value);
+	}
+	
+	printFields (elem);
+    } else {
+	auto not_null = receiver.rawRecv!bool ();
+	if (not_null) {	    
+	    elem = new T ();
+	    foreach (index, ref value ; elem.tupleof) {
+		static if (hasUDA!(T.tupleof [index], "pack"))
+		    unpack!(typeof (T.tupleof [index])) (receiver, value);
+	    }
+	} else elem = null;
+    }
+}
+
+void unpack (T) (sock.Socket receiver, ref T elem)
+    if (!isAggregateType!T) 
+{    
     elem = receiver.rawRecv!T ();    
 }
 
@@ -18,8 +61,9 @@ void unpack (T : string) (sock.Socket receiver, ref T elem) {
     elem = cast (string) (cast (char*) (data.ptr)) [0 .. len];
 }
 
-void unpack (T : T[]) (sock.Socket receiver, ref T [] elems) {
+void unpack (T : T[]) (sock.Socket receiver, ref T [] elems) {    
     auto len = receiver.rawRecv!ulong ();
+    writeln ("Unpack ", typeid (T), " of size ", len); 
     static if (is (T U : U[V], V)) {
 	elems = new T [len];
 	foreach (it ; 0 .. elems.length)
@@ -41,13 +85,10 @@ void unpack (T : T[]) (sock.Socket receiver, ref T [] elems) {
 
 void unpack (U, T : T[U])(sock.Socket receiver, ref T[U] elems) {
     auto len = receiver.rawRecv!ulong ();
-    writeln ("Unpack : ", typeid (T[U]), " of len : ", len);
     foreach (it ; 0 .. len) {
 	T value; U key;
 	unpack (receiver, key);
-	writeln ("\t - Unpack : ", typeid (T[U]), " Key : ", key);
 	unpack (receiver, value);
-	writeln ("\t - Unpack : ", typeid (T[U]), " value : ", value);
 	elems [key] = value;
     }
 }
@@ -73,12 +114,39 @@ void enpack (T : string) (sock.Socket sender, T elem) {
     sender.rawSend (cast (byte[]) elem);
 }
 
-void enpack (T) (sock.Socket sender, T elem) {
+void enpack (T) (sock.Socket sender, T elem)
+    if (isAggregateType!T)
+{
+    static if (is (T == struct)) {
+	foreach (index, value ; elem.tupleof) {
+	    static if (hasUDA!(T.tupleof [index], "pack")) {
+		writeln ("Packing : ", T.tupleof [index].stringof, " of type ", typeid (typeof (T.tupleof [index])));
+		enpack!(typeof (T.tupleof [index])) (sender, value);
+	    }
+	}
+    } else {
+	if (elem !is null) {
+	    sender.rawSend (true);
+	    foreach (index, value ; elem.tupleof) {
+		static if (hasUDA!(T.tupleof [index], "pack")) {
+		    writeln ("Packing : ", T.tupleof [index].stringof, " of type ", typeid (typeof (T.tupleof [index])));
+		    enpack!(typeof (T.tupleof [index])) (sender, value);
+		}
+	    }
+	} else sender.rawSend (false);
+    }
+}
+	
+
+void enpack (T) (sock.Socket sender, T elem)
+    if (!isAggregateType!T)
+{
     sender.rawSend (elem);
 }
 
 void enpack (T : T[]) (sock.Socket sender, T [] elem) {
     import std.algorithm.mutation;
+    writeln ("Pack ", typeid (T), " of size ", elem.length);
     sender.rawSend (elem.length);
     static if (is (T U : U[V], V)) {
 	foreach (it ; 0 .. elem.length)
@@ -96,12 +164,9 @@ void enpack (T : T[]) (sock.Socket sender, T [] elem) {
 
 void enpack (U, T : T[U]) (sock.Socket sock, T [U] elem) {
     sock.rawSend (elem.length);
-    writeln ("Enpack : ", typeid (T[U]), " of len : ", elem.length);
     foreach (key, value ; elem) {
 	enpack (sock, key);
-	writeln ("\t - Enpack : ", typeid (T[U]), " key : ", key);
 	enpack (sock, value);
-	writeln ("\t - Enpack : ", typeid (T[U]), " value : ", value);
     }
 }
 
