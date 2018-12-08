@@ -1,21 +1,21 @@
 import std.stdio;
-import netez = netez;
+import netez = netez._;
 
-class Protocol : netez.EzProto {
+class Protocol : netez.Proto {
 
-    this (netez.EzSocket sock) {
+    this (netez.Socket sock) {
 	super (sock);
-	ping = new netez.EzMessage !(1) (this);
-	pong = new netez.EzMessage !(2) (this);
+	ping = new netez.Message !(1) (this);
+	pong = new netez.Message !(2) (this);
     }
     
-    netez.EzMessage!(1) ping;
-    netez.EzMessage!(2) pong;
+    netez.Message!(1) ping;
+    netez.Message!(2) pong;
 }
 
-class Session : netez.EzServSession!Protocol {
+class Session : netez.ServSession!Protocol {
 
-    this (netez.EzSocket sock) {
+    this (netez.Socket sock) {
 	super (sock);
 	this.proto.ping.connect (&this.ping);
     }
@@ -25,21 +25,21 @@ class Session : netez.EzServSession!Protocol {
 	this.proto.pong.send ();
     }
 
-    override void on_begin (netez.EzAddress client) {
+    override void onBegin (netez.Address client) {
 	this.client = client;
 	writefln ("Nouveau client : %s:%s", client.address, client.port);
     }
 
-    void on_end () {
+    override void onEnd () {
 	writeln ("client deconnecte");
     }
 
  private:
 
-    netez.EzAddress client;
+    netez.Address client;
     
 }
 
 void main() {
-    netez.EzServer!Session session = new netez.EzServer!Session (2000);
+    netez.Server!Session session = new netez.Server!Session (2000);
 }

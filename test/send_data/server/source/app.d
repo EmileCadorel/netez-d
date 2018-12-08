@@ -18,14 +18,14 @@ class Session : netez.ServSession!Protocol {
 	super (sock);
     }
 
-    override void on_begin (netez.Address client) {
+    override void onBegin (netez.Address client) {
 	this.client = client;
 	writefln ("Nouveau client : %s:%s", client.address, client.port);
 	this.proto.msg.send (0, "test", ["core" : 2, "mem" : 12]);
-	super.end_session ();
+	super.endSession ();
     }
 
-    override void on_end () {
+    override void onEnd () {
 	writeln ("client deconnecte ", client.address, client.port);
     }
 

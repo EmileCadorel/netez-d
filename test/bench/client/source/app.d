@@ -29,13 +29,13 @@ class Session : netez.ClientSession!Protocol {
     }
     
     
-    override void on_begin () {
+    override void onBegin () {
 	writefln ("Connexion etablie : %s:%s",
 		  this.socket.remoteAddress.address,
 		  this.socket.remoteAddress.port);
     }
 
-    override void on_end () {
+    override void onEnd () {
 	writeln ("Deconnexion");
     }
     
