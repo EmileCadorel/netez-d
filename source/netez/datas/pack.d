@@ -32,17 +32,15 @@ void unpack (T) (sock.Socket receiver, ref T elem)
 {
     static if (is (T == struct)) {	
 	foreach (index, ref value ; elem.tupleof) {
-	    static if (hasUDA!(T.tupleof [index], "pack"))
+	    static if (!hasUDA!(T.tupleof [index], "nopack"))
 		unpack!(typeof (T.tupleof [index])) (receiver, value);
-	}
-	
-	printFields (elem);
+	}       
     } else {
 	auto not_null = receiver.rawRecv!bool ();
 	if (not_null) {	    
 	    elem = new T ();
 	    foreach (index, ref value ; elem.tupleof) {
-		static if (hasUDA!(T.tupleof [index], "pack"))
+		static if (!hasUDA!(T.tupleof [index], "nopack"))
 		    unpack!(typeof (T.tupleof [index])) (receiver, value);
 	    }
 	} else elem = null;
@@ -62,8 +60,7 @@ void unpack (T : string) (sock.Socket receiver, ref T elem) {
 }
 
 void unpack (T : T[]) (sock.Socket receiver, ref T [] elems) {    
-    auto len = receiver.rawRecv!ulong ();
-    writeln ("Unpack ", typeid (T), " of size ", len); 
+    auto len = receiver.rawRecv!ulong (); 
     static if (is (T U : U[V], V)) {
 	elems = new T [len];
 	foreach (it ; 0 .. elems.length)
@@ -119,8 +116,7 @@ void enpack (T) (sock.Socket sender, T elem)
 {
     static if (is (T == struct)) {
 	foreach (index, value ; elem.tupleof) {
-	    static if (hasUDA!(T.tupleof [index], "pack")) {
-		writeln ("Packing : ", T.tupleof [index].stringof, " of type ", typeid (typeof (T.tupleof [index])));
+	    static if (!hasUDA!(T.tupleof [index], "nopack")) {
 		enpack!(typeof (T.tupleof [index])) (sender, value);
 	    }
 	}
@@ -128,15 +124,14 @@ void enpack (T) (sock.Socket sender, T elem)
 	if (elem !is null) {
 	    sender.rawSend (true);
 	    foreach (index, value ; elem.tupleof) {
-		static if (hasUDA!(T.tupleof [index], "pack")) {
-		    writeln ("Packing : ", T.tupleof [index].stringof, " of type ", typeid (typeof (T.tupleof [index])));
+		static if (!hasUDA!(T.tupleof [index], "nopack")) {
 		    enpack!(typeof (T.tupleof [index])) (sender, value);
 		}
 	    }
 	} else sender.rawSend (false);
     }
-}
-	
+ }
+
 
 void enpack (T) (sock.Socket sender, T elem)
     if (!isAggregateType!T)
@@ -146,7 +141,6 @@ void enpack (T) (sock.Socket sender, T elem)
 
 void enpack (T : T[]) (sock.Socket sender, T [] elem) {
     import std.algorithm.mutation;
-    writeln ("Pack ", typeid (T), " of size ", elem.length);
     sender.rawSend (elem.length);
     static if (is (T U : U[V], V)) {
 	foreach (it ; 0 .. elem.length)

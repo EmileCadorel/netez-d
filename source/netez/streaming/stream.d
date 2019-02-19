@@ -15,10 +15,10 @@ class Stream {
 	this._socket = socket;
     }
     
-    void rawWrite (byte[] datas) {
+    void rawWrite (ubyte [] datas) {
 	this._socket.rawSend (datas);
     }
-
+    
     void rawWrite (string datas) {
 	this._socket.rawSend (cast (byte []) datas);
     }
